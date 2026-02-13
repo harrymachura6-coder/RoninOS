@@ -21,6 +21,31 @@ static uint32_t g_fb_height;
 static uint32_t g_fb_bpp;
 static int g_fb_valid;
 
+static void fb_print_u32(uint32_t n) {
+    char buf[10];
+    size_t i = 0;
+    if (n == 0) {
+        fb_putc('0');
+        return;
+    }
+    while (n && i < sizeof(buf)) {
+        buf[i++] = (char)('0' + (n % 10u));
+        n /= 10u;
+    }
+    while (i) {
+        fb_putc(buf[--i]);
+    }
+}
+
+static void fb_print_hex32(uint32_t n) {
+    const char* hex = "0123456789ABCDEF";
+    int shift;
+    fb_print("0x");
+    for (shift = 28; shift >= 0; shift -= 4) {
+        fb_putc(hex[(n >> (uint32_t)shift) & 0xFu]);
+    }
+}
+
 static const struct mb2_tag_framebuffer_common* find_mb2_framebuffer(uint32_t mb_magic, uint32_t mb_info_addr) {
     const struct mb2_info_header* hdr;
     const struct mb2_tag* tag;
@@ -77,6 +102,19 @@ void console_init(uint32_t mb_magic, uint32_t mb_info_addr) {
                 g_fb_bpp = fb->framebuffer_bpp;
                 g_fb_valid = 1;
                 serial_print("console: framebuffer backend active\n");
+                fb_print("R\xC5\x8DninOS UEFI\n");
+                fb_print("Framebuffer: ");
+                fb_print_u32(g_fb_width);
+                fb_putc('x');
+                fb_print_u32(g_fb_height);
+                fb_putc('x');
+                fb_print_u32(g_fb_bpp);
+                fb_print(" pitch=");
+                fb_print_u32(g_fb_pitch);
+                fb_print(" addr=");
+                fb_print_hex32((uint32_t)g_fb_phys_addr);
+                fb_putc('\n');
+                fb_print("If you see this, framebuffer console works.\n");
                 return;
             }
         }
