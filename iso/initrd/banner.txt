@@ -1,0 +1,2 @@
+RoninOS initrd online.
+VFS + RAMFS + Initrd milestone ready.
