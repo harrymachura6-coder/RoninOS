@@ -7,6 +7,19 @@ CFLAGS := -std=c11 -ffreestanding -O2 -Wall -Wextra -fno-pic -fno-pie -m32 -fno-
 LDFLAGS := -T kernel/linker.ld -nostdlib -m elf_i386
 ASFLAGS := --32
 
+FB_FONT ?= 16x32
+DEBUG ?= 0
+
+ifeq ($(FB_FONT),8x16)
+  CFLAGS += -DFB_FONT=816
+else
+  CFLAGS += -DFB_FONT=1632
+endif
+
+ifeq ($(DEBUG),1)
+  CFLAGS += -DFB_CONSOLE_DEBUG=1
+endif
+
 KERNEL_ELF := build/roninos.elf
 ISO_KERNEL := iso/boot/roninos.elf
 ISO_IMG    := build/roninos.iso

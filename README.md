@@ -203,11 +203,20 @@ Die GRUB-Konfiguration nutzt eine robuste `gfxmode`-Fallback-Liste statt einer e
 Dadurch scheitert UEFI-Boot auf echter Hardware nicht mehr an `no suitable video mode found`, wenn z. B. `1024x768` nicht unterstützt wird.
 
 - Video-Module: `all_video`, `efi_gop`, `efi_uga`, `gfxterm`
-- `set gfxmode=1920x1080,...,800x600,auto`
+- `set gfxmode=1024x768,1280x720,1280x800,1366x768,1600x900,1920x1080,800x600,auto` (bevorzugt 1024x768, dann Fallback)
 - `set gfxpayload=keep`, damit der Kernel den Framebuffer übernimmt
 - Debug-Menüeintrag: **"Debug: Show available video modes (videoinfo)"**
 
 Wenn ein Gerät andere Modi anbietet, greift GRUB automatisch auf den nächsten passenden Eintrag zurück.
+
+### Framebuffer-Font (UEFI)
+
+Die GOP-Konsole nutzt ein dynamisches Raster aus `Framebuffer / Fontzellgröße` statt fixem `80x25`.
+
+- Standard-Font: `16x32`
+- Optional: `make FB_FONT=8x16`
+- Debug-Overlay (eine Statuszeile mit FB/Font/Grid-Werten): `make DEBUG=1`
+
 
 ### USB-Stick flashen (UEFI)
 
