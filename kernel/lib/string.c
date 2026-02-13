@@ -37,6 +37,22 @@ void* memcpy(void* dst, const void* src, size_t n) {
     return dst;
 }
 
+void* memmove(void* dst, const void* src, size_t n) {
+    size_t i;
+    unsigned char* d = (unsigned char*)dst;
+    const unsigned char* s = (const unsigned char*)src;
+
+    if (d == s || n == 0) return dst;
+
+    if (d < s) {
+        for (i = 0; i < n; i++) d[i] = s[i];
+    } else {
+        for (i = n; i > 0; i--) d[i - 1] = s[i - 1];
+    }
+
+    return dst;
+}
+
 void* memset(void* dst, int value, size_t n) {
     size_t i;
     unsigned char* d = (unsigned char*)dst;
