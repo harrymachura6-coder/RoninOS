@@ -58,6 +58,8 @@ build/kernel.o
 
 all: $(ISO_IMG) verify
 
+include boot/uefi/Makefile
+
 build:
 	mkdir -p build
 
@@ -225,7 +227,13 @@ $(ISO_IMG): $(ISO_KERNEL) verify
 run: $(ISO_IMG)
 	qemu-system-i386 -cdrom $(ISO_IMG) -m 256M
 
+uefi-image: uefi
+	./tools/make-uefi-image.sh
+
+uefi-run: uefi-image
+	./tools/run-uefi-qemu.sh
+
 clean:
 	rm -rf build $(ISO_KERNEL)
 
-.PHONY: all run clean verify
+.PHONY: all run clean verify uefi-image uefi-run

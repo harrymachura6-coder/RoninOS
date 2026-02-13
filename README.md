@@ -20,8 +20,9 @@ RōninOS ist ein kompakter, freestanding Hobby-Kernel in C mit Fokus auf **Nachv
 8. [Technische Architektur](#technische-architektur)
 9. [Entwicklungsleitlinien](#entwicklungsleitlinien)
 10. [Troubleshooting](#troubleshooting)
-11. [Roadmap-Ideen](#roadmap-ideen)
-12. [Beitrag leisten](#beitrag-leisten)
+11. [UEFI build & run](#uefi-build--run)
+12. [Roadmap-Ideen](#roadmap-ideen)
+13. [Beitrag leisten](#beitrag-leisten)
 
 ---
 
@@ -116,6 +117,50 @@ disk read hd0 0 1
 ```
 
 > Empfehlung: Nach jeder funktionalen Änderung mindestens einmal komplett mit `make clean && make` neu bauen.
+
+---
+
+## UEFI build & run
+
+### Dependencies (Ubuntu/Debian)
+
+```bash
+sudo apt install gnu-efi mtools dosfstools ovmf qemu-system-x86
+```
+
+### UEFI-Binary bauen
+
+```bash
+make uefi
+```
+
+Erzeugt:
+
+- `build/uefi/BOOTX64.EFI`
+
+### FAT32-UEFI-Image bauen
+
+```bash
+make uefi-image
+```
+
+Erzeugt:
+
+- `build/uefi/roninos_uefi.img` (mit `/EFI/BOOT/BOOTX64.EFI`)
+
+### UEFI in QEMU starten
+
+```bash
+make uefi-run
+```
+
+Das Run-Script sucht OVMF robust über mehrere typische Pfade auf Ubuntu/Debian.
+
+### Echte Hardware (UEFI)
+
+1. USB-Stick als FAT32 formatieren.
+2. Ordnerstruktur `EFI/BOOT` anlegen.
+3. `BOOTX64.EFI` nach `EFI/BOOT/BOOTX64.EFI` kopieren.
 
 ---
 
