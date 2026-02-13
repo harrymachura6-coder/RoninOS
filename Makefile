@@ -227,7 +227,7 @@ $(ISO_IMG): $(ISO_KERNEL) verify
 run: $(ISO_IMG)
 	qemu-system-i386 -cdrom $(ISO_IMG) -m 256M
 
-uefi-image: uefi
+uefi-image: $(KERNEL_ELF) verify
 	./tools/make-uefi-image.sh
 
 uefi-run: uefi-image
