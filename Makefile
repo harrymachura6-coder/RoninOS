@@ -22,6 +22,8 @@ build/pit.o \
 build/isr.o \
 build/isr_stubs.o \
 build/console.o \
+build/fb_console.o \
+build/serial.o \
 build/keyboard_input.o \
 build/string.o \
 build/heap.o \
@@ -89,6 +91,12 @@ build/pit.o: kernel/pit.c | build
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 build/console.o: kernel/console.c | build
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+build/fb_console.o: kernel/fb_console.c | build
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+build/serial.o: kernel/serial.c | build
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 build/keyboard_input.o: kernel/input/keyboard.c | build

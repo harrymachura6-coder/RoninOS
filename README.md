@@ -158,6 +158,14 @@ Das Run-Script sucht OVMF robust über mehrere typische Pfade auf Ubuntu/Debian.
 
 > Falls vorher der Fehler `error: file '/boot/roninos.elf' not found` erschien: Das war ein Root-Setup-Problem in der eingebetteten GRUB-Konfiguration. Das Image sucht jetzt aktiv die Kernel-Datei auf dem FAT-Image, bevor `multiboot2` ausgeführt wird.
 
+
+### Bootstandard & UEFI-Konsole
+
+- RoninOS nutzt **Multiboot2** (Header-Magic `0xE85250D6`).
+- Unter UEFI gibt es keinen klassischen VGA-Textmodus bei `0xB8000`.
+- Deshalb fordert der Kernel einen **Multiboot2-Framebuffer-Tag** an und nutzt im UEFI-Pfad eine Framebuffer-Konsole.
+- Falls kein Framebuffer verfügbar ist, wird auf serielle Ausgabe (COM1) zur Diagnose zurückgefallen.
+
 ### UEFI-ISO bauen
 
 ```bash

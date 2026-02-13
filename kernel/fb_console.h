@@ -1,0 +1,8 @@
+#pragma once
+
+#include <stdint.h>
+
+int fb_init(uintptr_t addr, uint32_t width, uint32_t height, uint32_t pitch, uint32_t bpp);
+void fb_clear(void);
+void fb_putc(char c);
+void fb_print(const char* s);
