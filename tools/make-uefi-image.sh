@@ -32,10 +32,28 @@ cat > "$GRUB_CFG" <<'CFG'
 set timeout=0
 set default=0
 
+insmod all_video
+insmod efi_gop
+insmod efi_uga
+insmod gfxterm
+terminal_output gfxterm
+set gfxmode=1920x1080,1600x900,1366x768,1280x1024,1280x800,1280x720,1024x768,800x600,auto
+set gfxpayload=keep
+
 menuentry "RoninOS" {
+    insmod all_video
+    insmod efi_gop
+    set gfxpayload=keep
     search --no-floppy --file --set=root /boot/roninos.elf
     multiboot2 ($root)/boot/roninos.elf
     boot
+}
+
+menuentry "Debug: Show available video modes (videoinfo)" {
+    terminal_output gfxterm
+    videoinfo
+    echo "Press any key to return..."
+    read
 }
 CFG
 

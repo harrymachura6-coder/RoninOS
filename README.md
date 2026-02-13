@@ -190,6 +190,18 @@ qemu-system-x86_64 \
 
 Alternativ bleibt `make uefi-run` für den Test des FAT-UEFI-Images erhalten.
 
+### GRUB-Grafikmodus-Fallbacks (UEFI-Hardware)
+
+Die GRUB-Konfiguration nutzt eine robuste `gfxmode`-Fallback-Liste statt einer einzelnen festen Auflösung.
+Dadurch scheitert UEFI-Boot auf echter Hardware nicht mehr an `no suitable video mode found`, wenn z. B. `1024x768` nicht unterstützt wird.
+
+- Video-Module: `all_video`, `efi_gop`, `efi_uga`, `gfxterm`
+- `set gfxmode=1920x1080,...,800x600,auto`
+- `set gfxpayload=keep`, damit der Kernel den Framebuffer übernimmt
+- Debug-Menüeintrag: **"Debug: Show available video modes (videoinfo)"**
+
+Wenn ein Gerät andere Modi anbietet, greift GRUB automatisch auf den nächsten passenden Eintrag zurück.
+
 ### USB-Stick flashen (UEFI)
 
 #### Variante A: UEFI-FAT-Image direkt schreiben
