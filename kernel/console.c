@@ -46,6 +46,30 @@ static void fb_print_hex32(uint32_t n) {
     }
 }
 
+static void fb_print_debug_overlay(void) {
+#ifdef FB_CONSOLE_DEBUG
+    fb_print("FB: ");
+    fb_print_u32(g_fb_width);
+    fb_putc('x');
+    fb_print_u32(g_fb_height);
+    fb_print(" BPP ");
+    fb_print_u32(g_fb_bpp);
+    fb_print(" Pitch ");
+    fb_print_u32(g_fb_pitch);
+    fb_print(" Addr ");
+    fb_print_hex32((uint32_t)g_fb_phys_addr);
+    fb_print(" | Font: ");
+    fb_print_u32(fb_console_font_w());
+    fb_putc('x');
+    fb_print_u32(fb_console_font_h());
+    fb_print(" | Grid: ");
+    fb_print_u32(fb_console_cols());
+    fb_print(" x ");
+    fb_print_u32(fb_console_rows());
+    fb_putc('\n');
+#endif
+}
+
 static const struct mb2_tag_framebuffer_common* find_mb2_framebuffer(uint32_t mb_magic, uint32_t mb_info_addr) {
     const struct mb2_info_header* hdr;
     const struct mb2_tag* tag;
@@ -115,6 +139,7 @@ void console_init(uint32_t mb_magic, uint32_t mb_info_addr) {
                 fb_print_hex32((uint32_t)g_fb_phys_addr);
                 fb_putc('\n');
                 fb_print("If you see this, framebuffer console works.\n");
+                fb_print_debug_overlay();
                 return;
             }
         }
