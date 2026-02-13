@@ -235,6 +235,9 @@ $(ISO_IMG): $(ISO_KERNEL) verify
 run: $(ISO_IMG)
 	qemu-system-i386 -cdrom $(ISO_IMG) -m 256M
 
+run-serial: $(ISO_IMG)
+	qemu-system-i386 -cdrom $(ISO_IMG) -m 256M -serial stdio
+
 uefi-image: $(KERNEL_ELF) verify
 	./tools/make-uefi-image.sh
 
@@ -244,4 +247,4 @@ uefi-run: uefi-image
 clean:
 	rm -rf build $(ISO_KERNEL)
 
-.PHONY: all run clean verify uefi-image uefi-run
+.PHONY: all run run-serial clean verify uefi-image uefi-run

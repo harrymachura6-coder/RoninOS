@@ -14,6 +14,12 @@ typedef enum {
 } console_backend_t;
 
 static console_backend_t g_backend = CONSOLE_BACKEND_TERMINAL;
+static uint64_t g_fb_phys_addr;
+static uint32_t g_fb_pitch;
+static uint32_t g_fb_width;
+static uint32_t g_fb_height;
+static uint32_t g_fb_bpp;
+static int g_fb_valid;
 
 static const struct mb2_tag_framebuffer_common* find_mb2_framebuffer(uint32_t mb_magic, uint32_t mb_info_addr) {
     const struct mb2_info_header* hdr;
@@ -44,18 +50,35 @@ static const struct mb2_tag_framebuffer_common* find_mb2_framebuffer(uint32_t mb
 void console_init(uint32_t mb_magic, uint32_t mb_info_addr) {
     const struct mb2_tag_framebuffer_common* fb;
 
+    g_fb_phys_addr = 0;
+    g_fb_pitch = 0;
+    g_fb_width = 0;
+    g_fb_height = 0;
+    g_fb_bpp = 0;
+    g_fb_valid = 0;
+
     serial_init();
 
     fb = find_mb2_framebuffer(mb_magic, mb_info_addr);
     if (fb && (fb->framebuffer_bpp == 32 || fb->framebuffer_bpp == 24)) {
-        if (fb_init((uintptr_t)fb->framebuffer_addr,
-                    fb->framebuffer_width,
-                    fb->framebuffer_height,
-                    fb->framebuffer_pitch,
-                    fb->framebuffer_bpp)) {
-            g_backend = CONSOLE_BACKEND_FB;
-            serial_print("console: framebuffer backend active\n");
-            return;
+        if (fb->framebuffer_addr > 0xFFFFFFFFull) {
+            serial_print("console: framebuffer above 4GiB, fallback to VGA terminal\n");
+        } else {
+            if (fb_init((uintptr_t)fb->framebuffer_addr,
+                        fb->framebuffer_width,
+                        fb->framebuffer_height,
+                        fb->framebuffer_pitch,
+                        fb->framebuffer_bpp)) {
+                g_backend = CONSOLE_BACKEND_FB;
+                g_fb_phys_addr = fb->framebuffer_addr;
+                g_fb_pitch = fb->framebuffer_pitch;
+                g_fb_width = fb->framebuffer_width;
+                g_fb_height = fb->framebuffer_height;
+                g_fb_bpp = fb->framebuffer_bpp;
+                g_fb_valid = 1;
+                serial_print("console: framebuffer backend active\n");
+                return;
+            }
         }
     }
 
@@ -73,6 +96,30 @@ void console_init(uint32_t mb_magic, uint32_t mb_info_addr) {
 
 int console_using_framebuffer(void) {
     return g_backend == CONSOLE_BACKEND_FB;
+}
+
+int console_get_framebuffer(uint64_t* addr, uint32_t* pitch, uint32_t* w, uint32_t* h, uint32_t* bpp) {
+    if (g_backend != CONSOLE_BACKEND_FB || !g_fb_valid) {
+        return 0;
+    }
+
+    if (addr) {
+        *addr = g_fb_phys_addr;
+    }
+    if (pitch) {
+        *pitch = g_fb_pitch;
+    }
+    if (w) {
+        *w = g_fb_width;
+    }
+    if (h) {
+        *h = g_fb_height;
+    }
+    if (bpp) {
+        *bpp = g_fb_bpp;
+    }
+
+    return 1;
 }
 
 void console_clear(uint8_t color) {

@@ -102,11 +102,18 @@ make run
 ```
 
 ```bash
+# Serielle Diagnose auf stdout (empfohlen fuer Paging/UEFI-Debug)
+make run-serial
+```
+
+```bash
 # Beispiel mit zusaetzlicher 1GiB Raw-HDD fuer Blockdevice-Tests
 qemu-img create -f raw build/disk.img 1G
 qemu-system-i386 -cdrom build/roninos.iso -m 256M \
   -drive file=build/disk.img,format=raw,if=ide,index=0,media=disk
 ```
+
+VirtualBox-Hinweis: Fuer fruehe Fault-Diagnose COM1 auf Host-Pipe oder Datei umleiten, damit serielle Kernel-Logs sichtbar bleiben.
 
 Smoke-Check in der Shell:
 
