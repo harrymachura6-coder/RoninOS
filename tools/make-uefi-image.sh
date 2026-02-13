@@ -33,7 +33,8 @@ set timeout=0
 set default=0
 
 menuentry "RoninOS" {
-    multiboot2 /boot/roninos.elf
+    search --no-floppy --file --set=root /boot/roninos.elf
+    multiboot2 ($root)/boot/roninos.elf
     boot
 }
 CFG

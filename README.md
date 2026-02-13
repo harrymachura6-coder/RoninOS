@@ -120,7 +120,7 @@ disk read hd0 0 1
 
 ---
 
-## UEFI build & run
+## UEFI build, ISO erstellen, testen, USB flashen
 
 ### Dependencies (Ubuntu/Debian)
 
@@ -138,7 +138,7 @@ Erzeugt:
 
 - `build/uefi/BOOTX64.EFI`
 
-### FAT32-UEFI-Image bauen
+### UEFI-FAT-Image bauen (für `make uefi-run`)
 
 ```bash
 make uefi-image
@@ -156,11 +156,62 @@ make uefi-run
 
 Das Run-Script sucht OVMF robust über mehrere typische Pfade auf Ubuntu/Debian.
 
+> Falls vorher der Fehler `error: file '/boot/roninos.elf' not found` erschien: Das war ein Root-Setup-Problem in der eingebetteten GRUB-Konfiguration. Das Image sucht jetzt aktiv die Kernel-Datei auf dem FAT-Image, bevor `multiboot2` ausgeführt wird.
+
+### UEFI-ISO bauen
+
+```bash
+make clean && make
+```
+
+Erzeugt:
+
+- `build/roninos.iso`
+
+Die ISO kann sowohl für BIOS als auch (mit OVMF) für UEFI-Tests genutzt werden.
+
+### UEFI-ISO in QEMU testen
+
+```bash
+OVMF_CODE=/usr/share/OVMF/OVMF_CODE.fd
+qemu-system-x86_64 \
+  -drive if=pflash,format=raw,readonly=on,file="$OVMF_CODE" \
+  -cdrom build/roninos.iso \
+  -m 256M
+```
+
+Alternativ bleibt `make uefi-run` für den Test des FAT-UEFI-Images erhalten.
+
+### USB-Stick flashen (UEFI)
+
+#### Variante A: UEFI-FAT-Image direkt schreiben
+
+```bash
+make uefi-image
+sudo dd if=build/uefi/roninos_uefi.img of=/dev/sdX bs=4M status=progress conv=fsync
+sync
+```
+
+`/dev/sdX` durch das **gesamte** USB-Device ersetzen (z. B. `/dev/sdb`, nicht `/dev/sdb1`).
+
+#### Variante B: UEFI-Dateien auf bereits FAT32-formatierten USB-Stick kopieren
+
+```bash
+make uefi
+sudo mkdir -p /mnt/usb
+sudo mount /dev/sdX1 /mnt/usb
+sudo mkdir -p /mnt/usb/EFI/BOOT /mnt/usb/boot
+sudo cp build/uefi/BOOTX64.EFI /mnt/usb/EFI/BOOT/BOOTX64.EFI
+sudo cp build/roninos.elf /mnt/usb/boot/roninos.elf
+sync
+sudo umount /mnt/usb
+```
+
 ### Echte Hardware (UEFI)
 
-1. USB-Stick als FAT32 formatieren.
-2. Ordnerstruktur `EFI/BOOT` anlegen.
-3. `BOOTX64.EFI` nach `EFI/BOOT/BOOTX64.EFI` kopieren.
+1. Secure Boot deaktivieren (oder signierten Loader verwenden).
+2. Entweder Variante A (dd) oder Variante B (kopieren) nutzen.
+3. Im UEFI-Bootmenü den USB-Stick als UEFI-Gerät auswählen.
 
 ---
 
