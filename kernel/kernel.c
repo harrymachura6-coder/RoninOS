@@ -1,7 +1,5 @@
 #include "console.h"
 #include "shell/shell.h"
-#include "terminal/terminal.h"
-#include "ui/theme.h"
 #include "heap.h"
 #include "idt.h"
 #include "isr.h"
@@ -59,7 +57,7 @@ static void memory_smoke_test(void) {
 }
 
 void kmain(uint32_t mb_magic, uint32_t mb_info_addr) {
-    terminal_init(&THEME_RONIN_DARK);
+    console_init(mb_magic, mb_info_addr);
     console_print("RoninOS kernel startet!\n");
 
     console_print("Init: PMM...\n");
@@ -93,8 +91,13 @@ void kmain(uint32_t mb_magic, uint32_t mb_info_addr) {
 
     __asm__ volatile("sti");
 
-    console_print("OK. Tippe 'help' und druecke Enter.\n");
-    shell_init();
+    if (console_using_framebuffer()) {
+        console_print("Framebuffer-Konsole aktiv (UEFI/GOP).\n");
+        console_print("Hinweis: interaktive VGA-Shell ist in diesem Modus deaktiviert.\n");
+    } else {
+        console_print("OK. Tippe 'help' und druecke Enter.\n");
+        shell_init();
+    }
 
     for (;;) {
         __asm__ volatile("hlt");

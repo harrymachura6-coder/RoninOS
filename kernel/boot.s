@@ -12,6 +12,15 @@ mb2_start:
   .long MB2_LEN
   .long MB2_CHK
 
+  # Framebuffer request tag (type 5): prefer 1024x768x32 under UEFI/GOP.
+  .short 5
+  .short 0
+  .long 20
+  .long 1024
+  .long 768
+  .long 32
+
+  .balign 8
   .short 0
   .short 0
   .long 8
