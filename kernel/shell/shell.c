@@ -15,8 +15,16 @@ static size_t g_cursor = 0;
 static char g_history[SHELL_HISTORY_MAX][SHELL_LINE_MAX];
 static size_t g_hist_count = 0;
 static int g_hist_index = -1;
+static int g_simple_mode = 0;
+
+static void simple_prompt(void) {
+    console_print("ronin> ");
+}
 
 static void redraw_input(void) {
+    if (g_simple_mode) {
+        return;
+    }
     terminal_set_input_line(g_line, g_len, g_cursor);
 }
 
@@ -58,12 +66,56 @@ void shell_init(void) {
     g_line[0] = 0;
     g_len = 0;
     g_cursor = 0;
-    terminal_set_prompt("ronin> ");
+    g_simple_mode = console_using_framebuffer();
+    if (!g_simple_mode) {
+        terminal_set_prompt("ronin> ");
+    }
     redraw_input();
+    if (g_simple_mode) {
+        simple_prompt();
+    }
 }
 
 void shell_handle_key(key_event_t ev) {
     size_t i;
+
+    if (g_simple_mode) {
+        switch (ev.code) {
+            case KEY_CHAR:
+                if (g_len < SHELL_LINE_MAX - 1 && g_cursor == g_len) {
+                    g_line[g_cursor++] = ev.ch;
+                    g_len = g_cursor;
+                    g_line[g_len] = 0;
+                    console_putc(ev.ch);
+                }
+                return;
+
+            case KEY_BACKSPACE:
+                if (g_cursor > 0 && g_cursor == g_len) {
+                    g_len--;
+                    g_cursor--;
+                    g_line[g_len] = 0;
+                    console_putc('\b');
+                    console_putc(' ');
+                    console_putc('\b');
+                }
+                return;
+
+            case KEY_ENTER:
+                console_putc('\n');
+                history_store();
+                shell_execute_line(g_line);
+                g_hist_index = -1;
+                g_line[0] = 0;
+                g_len = 0;
+                g_cursor = 0;
+                simple_prompt();
+                return;
+
+            default:
+                return;
+        }
+    }
 
     if (ev.code == KEY_PAGEUP || (ev.code == KEY_UP && (ev.modifiers & KEYMOD_SHIFT))) {
         terminal_scroll_lines(+8);

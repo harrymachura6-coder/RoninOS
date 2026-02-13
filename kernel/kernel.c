@@ -93,11 +93,9 @@ void kmain(uint32_t mb_magic, uint32_t mb_info_addr) {
 
     if (console_using_framebuffer()) {
         console_print("Framebuffer-Konsole aktiv (UEFI/GOP).\n");
-        console_print("Hinweis: interaktive VGA-Shell ist in diesem Modus deaktiviert.\n");
-    } else {
-        console_print("OK. Tippe 'help' und druecke Enter.\n");
-        shell_init();
     }
+    console_print("OK. Tippe 'help' und druecke Enter.\n");
+    shell_init();
 
     for (;;) {
         __asm__ volatile("hlt");
